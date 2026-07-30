@@ -110,7 +110,11 @@ export default function QuakesPage() {
                           🇦🇷 Argentina
                         </span>
                       )}
-                      <span className="text-[11px] text-slate-400">{new Date(q.time).toLocaleDateString()}</span>
+                      <span className="text-[11px] text-slate-400">
+                            { q.time && !isNaN(new Date(q.time).getTime()) 
+                            ? new Date(q.time).toLocaleDateString() 
+                            : "Fecha no disponible"}
+                      </span>
                     </div>
                     <p className="text-xs font-medium text-slate-200 line-clamp-1">{q.place}</p>
                   </div>
