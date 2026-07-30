@@ -39,7 +39,7 @@ export default function QuakesPage() {
         id: item.id,
         magnitude: item.properties.mag,
         place: item.properties.place,
-        time: item.time,
+        time: item.properties.time, // <-- Corregido aquí (estaba en properties)
         depth: item.geometry.coordinates[2],
         lng: item.geometry.coordinates[0],
         lat: item.geometry.coordinates[1],
@@ -111,9 +111,7 @@ export default function QuakesPage() {
                         </span>
                       )}
                       <span className="text-[11px] text-slate-400">
-                            { q.time && !isNaN(new Date(q.time).getTime()) 
-                            ? new Date(q.time).toLocaleDateString() 
-                            : "Fecha no disponible"}
+                        {q.time ? new Date(q.time).toLocaleDateString("es-ES") : "Fecha no disponible"}
                       </span>
                     </div>
                     <p className="text-xs font-medium text-slate-200 line-clamp-1">{q.place}</p>
