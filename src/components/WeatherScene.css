@@ -1,0 +1,508 @@
+/* ==================== CONTENEDOR PRINCIPAL ==================== */
+.weather-scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0; /* Se asegura que el fondo esté detrás de la UI principal */
+  overflow: hidden;
+}
+
+/* ==================== ESCENAS ==================== */
+.scene {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ==================== LLUVIA ==================== */
+.rain-drops {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rain-drop {
+  position: absolute;
+  top: -30px;
+  width: 2px;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.7));
+  border-radius: 0 0 4px 4px;
+  animation: rainFall linear infinite;
+}
+
+.storm-drop {
+  width: 2.5px;
+  height: 35px;
+  background: linear-gradient(to bottom, transparent, rgba(200, 220, 255, 0.8));
+}
+
+@keyframes rainFall {
+  0% {
+    transform: translateY(-30px) rotate(5deg);
+  }
+  100% {
+    transform: translateY(105vh) rotate(5deg);
+  }
+}
+
+/* Personaje con paraguas */
+.character.umbrella-person {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30; /* Permite que el personaje aparezca por delante de la UI */
+  animation: walkBounce 0.6s ease-in-out infinite;
+}
+
+.umbrella-svg {
+  animation: umbrellaSway 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes umbrellaSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes walkBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
+}
+
+/* Piernas caminando */
+.person-walking {
+  position: relative;
+  margin-top: 4px;
+}
+
+.legs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.leg {
+  width: 10px;
+  height: 30px;
+  background: #1e40af;
+  border-radius: 4px 4px 6px 6px;
+  animation: legWalk 0.6s ease-in-out infinite;
+}
+
+.leg-left {
+  animation-delay: 0s;
+  transform-origin: top center;
+}
+
+.leg-right {
+  animation-delay: 0.3s;
+  transform-origin: top center;
+}
+
+@keyframes legWalk {
+  0%, 100% { transform: rotate(-20deg); }
+  50% { transform: rotate(20deg); }
+}
+
+.boots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -2px;
+}
+
+.boot {
+  width: 13px;
+  height: 9px;
+  background: #1e293b;
+  border-radius: 3px 3px 5px 5px;
+  animation: bootWalk 0.6s ease-in-out infinite;
+}
+
+.boot-left { animation-delay: 0s; }
+.boot-right { animation-delay: 0.3s; }
+
+@keyframes bootWalk {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-2px) rotate(5deg); }
+}
+
+/* Charco */
+.puddle {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 15px;
+  background: rgba(100, 180, 255, 0.4);
+  border-radius: 50%;
+}
+
+.splash {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(200, 230, 255, 0.8);
+  border-radius: 50%;
+  animation: splashUp 0.8s ease-out infinite;
+}
+
+.splash-1 {
+  left: 15px;
+  bottom: 5px;
+  animation-delay: 0s;
+}
+
+.splash-2 {
+  right: 15px;
+  bottom: 5px;
+  animation-delay: 0.4s;
+}
+
+@keyframes splashUp {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-20px) scale(0); opacity: 0; }
+}
+
+/* ==================== SOLEADO ==================== */
+.scene-sunny .sun-character {
+  position: absolute;
+  top: 8%;
+  right: 10%;
+  animation: sunFloat 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.6));
+}
+
+@keyframes sunFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.sun-ray-line {
+  transform-origin: 80px 80px;
+  animation: rayPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes rayPulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Nubes flotando */
+.clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fluffy-cloud {
+  position: absolute;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  animation: cloudDrift linear infinite;
+}
+
+.cloud-1 {
+  top: 20%;
+  left: -10%;
+  animation-duration: 25s;
+}
+
+.cloud-2 {
+  top: 35%;
+  left: -15%;
+  animation-duration: 35s;
+  animation-delay: -8s;
+}
+
+.cloud-3 {
+  top: 12%;
+  left: -20%;
+  animation-duration: 30s;
+  animation-delay: -15s;
+}
+
+@keyframes cloudDrift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(100vw + 200px)); }
+}
+
+/* Pájaros */
+.birds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bird {
+  position: absolute;
+  animation: birdFly linear infinite;
+}
+
+.bird-1 {
+  top: 15%;
+  left: -10%;
+  animation-duration: 12s;
+}
+
+.bird-2 {
+  top: 22%;
+  left: -15%;
+  animation-duration: 16s;
+  animation-delay: -5s;
+}
+
+@keyframes birdFly {
+  0% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(25vw) translateY(-15px); }
+  50% { transform: translateX(50vw) translateY(-5px); }
+  75% { transform: translateX(75vw) translateY(-20px); }
+  100% { transform: translateX(110vw) translateY(0); }
+}
+
+/* ==================== NOCHE ==================== */
+.stars-field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.star-twinkle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: white;
+  border-radius: 50%;
+  animation: starTwinkle ease-in-out infinite;
+  box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.moon-character {
+  position: absolute;
+  top: 8%;
+  left: 15%;
+  animation: moonFloat 5s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(253, 230, 138, 0.5));
+}
+
+@keyframes moonFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+
+.night-clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+}
+
+.night-cloud {
+  position: absolute;
+  animation: nightCloudDrift linear infinite;
+}
+
+.nc-1 {
+  top: 30%;
+  left: -10%;
+  animation-duration: 40s;
+}
+
+.nc-2 {
+  top: 45%;
+  left: -20%;
+  animation-duration: 50s;
+  animation-delay: -20s;
+}
+
+@keyframes nightCloudDrift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(100vw + 300px)); }
+}
+
+.owl-character {
+  position: absolute;
+  bottom: 15%;
+  right: 12%;
+  animation: owlBob 3s ease-in-out infinite;
+  z-index: 30; /* Permite que el personaje aparezca por delante de la UI */
+  filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.4));
+}
+
+@keyframes owlBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ==================== TORMENTA ==================== */
+.storm-clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.storm-cloud {
+  position: absolute;
+  animation: stormCloudMove 8s ease-in-out infinite;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.5));
+}
+
+.sc-main {
+  top: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.sc-secondary {
+  top: 12%;
+  left: 25%;
+  animation-delay: -4s;
+}
+
+@keyframes stormCloudMove {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-15px); }
+  75% { transform: translateX(15px); }
+}
+
+/* Relámpagos */
+.lightning-bolts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bolt {
+  position: absolute;
+  opacity: 0;
+}
+
+.bolt-1 {
+  top: 18%;
+  right: 25%;
+  animation: lightningFlash 4s ease-in-out infinite;
+}
+
+.bolt-2 {
+  top: 20%;
+  right: 40%;
+  animation: lightningFlash 4s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.bolt-shape {
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.9));
+}
+
+@keyframes lightningFlash {
+  0%, 95%, 100% { opacity: 0; }
+  96% { opacity: 1; }
+  97% { opacity: 0.3; }
+  98% { opacity: 1; }
+  99% { opacity: 0; }
+}
+
+/* Personaje de tormenta */
+.character.storm-person {
+  position: absolute;
+  bottom: 10%;
+  left: 20%;
+  animation: stormPersonTremble 0.3s ease-in-out infinite;
+}
+
+@keyframes stormPersonTremble {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* ==================== NIEVE ==================== */
+.snowflakes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.snowflake {
+  position: absolute;
+  top: -20px;
+  animation: snowFall linear infinite;
+  pointer-events: none;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes snowFall {
+  0% {
+    transform: translateY(-20px) rotate(0deg) translateX(0);
+  }
+  25% {
+    transform: translateY(25vh) rotate(90deg) translateX(20px);
+  }
+  50% {
+    transform: translateY(50vh) rotate(180deg) translateX(-10px);
+  }
+  75% {
+    transform: translateY(75vh) rotate(270deg) translateX(15px);
+  }
+  100% {
+    transform: translateY(105vh) rotate(360deg) translateX(-5px);
+  }
+}
+
+/* Suelo nevado */
+.snow-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* Muñeco de nieve */
+.snowman-character {
+  position: absolute;
+  bottom: 15%;
+  left: 10%;
+  animation: snowmanWave 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+@keyframes snowmanWave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(2deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+/* Árbol nevado */
+.snowy-tree {
+  position: absolute;
+  bottom: 12%;
+  right: 10%;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}

@@ -19,13 +19,16 @@ export default function WeatherForecast({ hourly }: WeatherForecastProps) {
 
   if (!hourly || !hourly.time) return null;
 
-  // Tomamos las próximas 6 horas para el widget principal
-  const nextHours = hourly.time.slice(0, 6).map((timeStr, index) => {
+  const now = new Date();
+  const currentHourIndex = hourly.time.findIndex(timeStr => new Date(timeStr) >= now);
+  const startIndex = currentHourIndex === -1 ? hourly.time.length - 6 : currentHourIndex;
+
+  const nextHours = hourly.time.slice(startIndex, startIndex + 6).map((timeStr, index) => {
     const date = new Date(timeStr);
-    const hourFormatted = index === 0 ? "Ahora" : `${date.getHours()}:00`;
-    const temp = Math.round(hourly.temperature_2m[index]);
-    const code = hourly.weather_code[index];
-    const precip = hourly.precipitation_probability ? hourly.precipitation_probability[index] : 0;
+    const hourFormatted = index === 0 ? "Ahora" : `${date.getHours().toString().padStart(2, '0')}:00`;
+    const temp = Math.round(hourly.temperature_2m[startIndex + index]);
+    const code = hourly.weather_code[startIndex + index];
+    const precip = hourly.precipitation_probability ? hourly.precipitation_probability[startIndex + index] : 0;
 
     let IconComponent = Sun;
     let iconColor = "text-amber-300";
@@ -50,7 +53,6 @@ export default function WeatherForecast({ hourly }: WeatherForecastProps) {
     };
   });
 
-  // Tomamos más horas (por ejemplo, 24 horas) para el listado del modal de detalles
   const extendedHours = hourly.time.slice(0, 24).map((timeStr, index) => {
     const date = new Date(timeStr);
     const hourFormatted = `${date.getHours().toString().padStart(2, '0')}:00`;
@@ -85,10 +87,13 @@ export default function WeatherForecast({ hourly }: WeatherForecastProps) {
     };
   });
 
+  const temps = nextHours.map(h => h.temp);
+  const minTemp = Math.min(...temps);
+  const maxTemp = Math.max(...temps);
+
   return (
     <>
       <div className="bg-slate-900/60 backdrop-blur-3xl border border-white/10 rounded-[28px] p-4 shadow-2xl mb-4 text-white">
-        {/* Cabecera estilo One UI */}
         <div className="flex justify-between items-center mb-4 px-1">
           <span className="text-xs font-semibold text-slate-200 tracking-wide">Pronóstico por horas</span>
           <button 
@@ -99,7 +104,6 @@ export default function WeatherForecast({ hourly }: WeatherForecastProps) {
           </button>
         </div>
 
-        {/* Horas e Íconos */}
         <div className="grid grid-cols-6 gap-1 text-center mb-1">
           {nextHours.map((item, idx) => {
             const { Icon, iconColor } = item;
@@ -115,20 +119,32 @@ export default function WeatherForecast({ hourly }: WeatherForecastProps) {
           })}
         </div>
 
-        {/* Gráfica de línea de tendencia */}
-        <div className="relative px-3 py-2 my-1">
-          <div className="absolute top-1/2 left-4 right-4 h-[1.5px] bg-blue-400/30 -translate-y-1/2 rounded-full"></div>
-          <div className="flex justify-between items-center relative z-10 px-1">
-            {nextHours.map((_, idx) => (
-              <div 
-                key={idx} 
-                className="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)] border-2 border-slate-900"
-              />
-            ))}
+        <div className="relative h-12 px-1 my-1">
+          <svg width="100%" height="100%" viewBox="0 0 250 50" preserveAspectRatio="none">
+            <path 
+              d={
+                "M " + temps.map((temp, i) => {
+                  const x = i * (250 / 5);
+                  const y = 45 - ((temp - minTemp) / ((maxTemp - minTemp) || 1)) * 40;
+                  return `${x} ${y}`;
+                }).join(" L ")
+              }
+              fill="none"
+              stroke="rgba(56, 189, 248, 0.5)"
+              strokeWidth="2"
+            />
+          </svg>
+          <div className="absolute inset-0 flex justify-between items-center">
+            {temps.map((temp, idx) => {
+              const yPercent = 100 - ((temp - minTemp) / ((maxTemp - minTemp) || 1)) * 80;
+              return <div 
+                key={idx}
+                className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] border border-slate-900"
+                style={{ position: 'absolute', left: `calc(${idx * (100/5.5)}% + 8px)`, top: `calc(${yPercent}% - 4px)` }}
+              />})}
           </div>
         </div>
 
-        {/* Probabilidad de lluvia inferior */}
         <div className="grid grid-cols-6 gap-1 text-center pt-1 border-t border-white/5">
           {nextHours.map((item, idx) => (
             <div key={idx} className="flex items-center justify-center gap-0.5 pt-1">
@@ -139,12 +155,10 @@ export default function WeatherForecast({ hourly }: WeatherForecastProps) {
         </div>
       </div>
 
-      {/* MODAL DE DETALLES HORARIOS */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
           <div className="bg-slate-950 border border-white/15 w-full max-w-md max-h-[85vh] rounded-[32px] p-5 flex flex-col shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
             
-            {/* Header del Modal */}
             <div className="flex justify-between items-center pb-3 border-b border-white/10 mb-3">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <Thermometer size={16} className="text-blue-400" /> Detalle por Horas (24h)
@@ -157,7 +171,6 @@ export default function WeatherForecast({ hourly }: WeatherForecastProps) {
               </button>
             </div>
 
-            {/* Lista detallada */}
             <div className="overflow-y-auto space-y-2 pr-1 custom-scrollbar">
               {extendedHours.map((hour, index) => {
                 const { Icon, iconColor } = hour;
@@ -186,7 +199,6 @@ export default function WeatherForecast({ hourly }: WeatherForecastProps) {
               })}
             </div>
 
-            {/* Footer del Modal */}
             <button
               onClick={() => setShowModal(false)}
               className="mt-4 w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-2xl text-xs font-semibold transition shadow-lg cursor-pointer"

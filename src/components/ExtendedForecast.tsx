@@ -29,7 +29,10 @@ export default function ExtendedForecast({ daily }: ExtendedForecastProps) {
       <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Pronóstico a 7 días</h3>
       <div className="space-y-2.5">
         {daily.time.slice(0, 7).map((dateStr: string, index: number) => {
-          const date = new Date(dateStr);
+          // La API devuelve fechas en UTC (ej: "2024-07-25"). 
+          // Para evitar problemas de zona horaria, añadimos 'T00:00:00' para que se interprete como local.
+          const date = new Date(`${dateStr}T00:00:00`);
+
           const dayName = index === 0 ? "Hoy" : date.toLocaleDateString("es-ES", { weekday: 'short' });
           const code = daily.weather_code[index];
           const minTemp = Math.round(daily.temperature_2m_min[index]);

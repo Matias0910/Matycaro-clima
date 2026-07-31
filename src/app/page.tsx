@@ -6,7 +6,9 @@ import Navigation from "@/components/Navigation";
 import WeatherForecast from "@/components/WeatherForecast";
 import ExtendedForecast from "@/components/ExtendedForecast";
 import WeatherDetails from "@/components/WeatherDetails";
-import WeatherScreen from "@/components/WeatherScreen";
+import { AnimatedMascot } from "@/components/AnimatedMascot";
+// import WeatherScreen from "@/components/WeatherScreen";
+import WeatherScene from "@/components/WeatherScene";
 import { useAppStore } from "@/store/useAppStore";
 
 export default function Home() {
@@ -110,18 +112,23 @@ export default function Home() {
   const isNight = currentHour < 6 || currentHour > 20;
 
   const getWeatherType = () => {
-    if (weatherCode >= 95) return "storm";
-    if (weatherCode >= 71 && weatherCode <= 77) return "snow";
+    if (weatherCode >= 71 && weatherCode < 80) return "snow";
     if (isRainy) return "rain";
     if (isNight) return "night";
     return "sunny";
   };
 
+  const getWeatherDescription = () => {
+    if (weatherCode >= 95) return "Tormenta eléctrica";
+    if (weatherCode >= 71 && weatherCode <= 77) return "Nieve";
+    return isSunny ? "Despejado" : isRainy ? "Lluvia" : isNight ? "Noche despejada" : "Nublado";
+  };
   return (
     <main className="relative w-screen h-screen text-white overflow-hidden flex justify-center items-center">
       
       {/* 1. FONDO DINÁMICO ANIMADO */}
-      <WeatherScreen weather={getWeatherType()} />
+      {/* <WeatherScreen weather={getWeatherType()} /> */}
+      <WeatherScene weather={getWeatherType()} />
 
       {/* 2. TARJETA CENTRAL FLOTANTE */}
       <div className="relative z-10 w-full max-w-lg h-[92vh] rounded-[32px] bg-slate-950/40 backdrop-blur-md border border-white/10 p-6 flex flex-col justify-between shadow-2xl overflow-y-auto">
@@ -217,7 +224,7 @@ export default function Home() {
                 </div>
 
                 <p className="text-slate-200 font-medium text-sm mt-2 drop-shadow">
-                  {weatherCode >= 95 ? "Tormenta eléctrica" : weatherCode >= 71 && weatherCode <= 77 ? "Nieve" : isSunny ? "Despejado / Soleado" : isRainy ? "Lluvioso" : isNight ? "Noche despejada" : "Nublado"}
+                  {getWeatherDescription()}
                 </p>
                 <p className="text-xs text-slate-300 mt-1 drop-shadow">
                   Mín: {Math.round(weatherData.daily?.temperature_2m_min?.[0] ?? 0)}°C | Máx: {Math.round(weatherData.daily?.temperature_2m_max?.[0] ?? 0)}°C
@@ -228,6 +235,9 @@ export default function Home() {
               </div>
             ) : null}
           </div>
+
+          {/* Mascota Animada */}
+          <AnimatedMascot condition={getWeatherDescription()} />
 
           {/* Pronóstico por Horas */}
           <WeatherForecast hourly={weatherData?.hourly || null} />
