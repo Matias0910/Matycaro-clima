@@ -7,6 +7,9 @@ import WeatherForecast from "@/components/WeatherForecast";
 import ExtendedForecast from "@/components/ExtendedForecast";
 import WeatherDetails from "@/components/WeatherDetails";
 import { AnimatedMascot } from "@/components/AnimatedMascot";
+import { WeatherAlertsCard } from "@/components/WeatherAlertsCard";
+import { RealArgentinaMap } from "@/components/RealArgentinaMap";
+//import { OfficialAlertsMap } from "@/components/OfficialAlertsMap";
 // import WeatherScreen from "@/components/WeatherScreen";
 import WeatherScene from "@/components/WeatherScene";
 import { useAppStore } from "@/store/useAppStore";
@@ -248,12 +251,14 @@ export default function Home() {
           {/* Detalles del Clima (Viento, Humedad, etc.) */}
           <WeatherDetails current={weatherData?.current || null} />
         </div>
+        {/* MAPA DE ALERTAS OFICIAL */}
+        <RealArgentinaMap/>
 
         {/* Navegación Inferior */}
         <div className="pt-4 pb-2">
           <Navigation />
         </div>
-
+        
       </div>
     </main>
   );
