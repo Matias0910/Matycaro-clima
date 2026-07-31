@@ -1,11 +1,61 @@
 "use client";
 
+import { useState } from "react";
 import { Bell, BellOff, ArrowLeft, Send } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
 
+// Generador dinámico de días
+const getDaysList = () => {
+  const daysList = [];
+  const today = new Date();
+  
+  for (let i = 0; i < 3; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dayName = d.toLocaleDateString('es-ES', { weekday: 'long' });
+    const dayNum = d.getDate();
+    const formatted = `${dayName.charAt(0).toUpperCase() + dayName.slice(1)} ${dayNum}`;
+    daysList.push({ id: i, label: formatted });
+  }
+  return daysList;
+};
+
 export default function AlertsPage() {
   const { minMagnitude, notificationsEnabled, setMinMagnitude, setNotificationsEnabled } = useAppStore();
+  
+  const days = getDaysList();
+  const [selectedDay, setSelectedDay] = useState(days[0].label);
+  const [activeLayer, setActiveLayer] = useState("storm"); // storm, rain, wind, snow
+
+  const alertDetails: Record<string, { title: string; type: string; color: string; desc: string }> = {
+    storm: {
+      title: "Alerta por Tormentas Severas",
+      type: "Tormentas de variada intensidad",
+      color: "border-amber-500/50 bg-amber-500/10 text-amber-300",
+      desc: "Tormentas fuertes o localmente severas. Ráfagas de viento, posible caída de granizo y fuerte actividad eléctrica."
+    },
+    rain: {
+      title: "Alerta por Lluvias Intensas",
+      type: "Precipitaciones Continuas",
+      color: "border-blue-500/50 bg-blue-500/10 text-blue-300",
+      desc: "Lluvias persistentes de moderada a fuerte intensidad en cortos períodos."
+    },
+    wind: {
+      title: "Alerta por Vientos Fuertes",
+      type: "Ráfagas Intensas",
+      color: "border-cyan-500/50 bg-cyan-500/10 text-cyan-300",
+      desc: "Vientos con ráfagas que podrían superar los límites habituales en la región."
+    },
+    snow: {
+      title: "Aviso por Nevadas",
+      type: "Acumulación Nival",
+      color: "border-indigo-500/50 bg-indigo-500/10 text-indigo-300",
+      desc: "Nevadas de variada intensidad con reducción de visibilidad."
+    }
+  };
+
+  const currentAlert = alertDetails[activeLayer];
 
   const handleToggleNotifications = async () => {
     if (!("Notification" in window)) {
@@ -39,19 +89,77 @@ export default function AlertsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6 max-w-md mx-auto flex flex-col justify-between">
-      <div>
-        <header className="flex justify-between items-center mb-6">
+    <main className="min-h-screen bg-slate-950 text-white p-4 md:p-6 max-w-md mx-auto flex flex-col justify-between">
+      <div className="space-y-5">
+        <header className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
             <Link href="/" className="p-2 bg-slate-900 rounded-full hover:bg-slate-800 transition border border-slate-800">
               <ArrowLeft size={18} />
             </Link>
-            <h1 className="font-bold text-sm">Configuración Pro de Alertas</h1>
+            <h1 className="font-bold text-sm">Centro de Alertas (Clima y Sismos)</h1>
           </div>
         </header>
 
-        {/* Tarjeta de Notificaciones */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-5 shadow-xl">
+        {/* ==================== SECCIÓN DE ALERTAS METEOROLÓGICAS ==================== */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
+          <h2 className="font-semibold text-xs text-slate-300">🗺️ Alertas Meteorológicas Oficiales</h2>
+
+          {/* Solapas de días */}
+          <div className="flex bg-slate-950 p-1 rounded-2xl gap-1 border border-slate-800">
+            {days.map((day) => (
+              <button
+                key={day.id}
+                onClick={() => setSelectedDay(day.label)}
+                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all ${
+                  selectedDay === day.label
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                }`}
+              >
+                {day.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Botones de capas */}
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {[
+              { id: "storm", icon: "⛈️", label: "Tormentas" },
+              { id: "rain", icon: "🌧️", label: "Lluvias" },
+              { id: "wind", icon: "💨", label: "Vientos" },
+              { id: "snow", icon: "❄️", label: "Nieve" },
+            ].map((layer) => (
+              <button
+                key={layer.id}
+                onClick={() => setActiveLayer(layer.id)}
+                className={`flex-1 py-2 px-3 rounded-xl border text-xs flex items-center justify-center gap-1.5 transition ${
+                  activeLayer === layer.id
+                    ? "bg-amber-500/20 border-amber-500/80 text-amber-300"
+                    : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
+                }`}
+              >
+                <span>{layer.icon}</span>
+                <span>{layer.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Tarjeta de descripción de la alerta */}
+          <div className={`border rounded-2xl p-3.5 ${currentAlert.color}`}>
+            <div className="flex items-start gap-2.5">
+              <span className="text-xl">⚠️</span>
+              <div>
+                <h3 className="font-bold text-xs">{currentAlert.title}</h3>
+                <p className="text-[11px] mt-1 opacity-90 leading-tight">
+                  <span className="font-semibold">{selectedDay}:</span> {currentAlert.desc}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ==================== TARJETA DE NOTIFICACIONES PUSH ==================== */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
               {notificationsEnabled ? (
@@ -65,7 +173,7 @@ export default function AlertsPage() {
               )}
               <div>
                 <h2 className="font-semibold text-xs">Notificaciones Push</h2>
-                <p className="text-[10px] text-slate-400">Estado persistente en la nube/local</p>
+                <p className="text-[10px] text-slate-400">Estado persistente</p>
               </div>
             </div>
             <button
@@ -88,11 +196,11 @@ export default function AlertsPage() {
           </button>
         </div>
 
-        {/* Ajustes de Umbral con Zustand */}
+        {/* ==================== AJUSTES DE UMBRAL (ZUSTAND) ==================== */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
           <h2 className="font-semibold text-xs mb-3">Filtros de Sismos (Argentina)</h2>
           
-          <div className="mb-4">
+          <div className="mb-3">
             <div className="flex justify-between text-xs text-slate-400 mb-2">
               <span>Umbral mínimo:</span>
               <span className="font-bold text-amber-400">≥ {minMagnitude} Mag</span>
@@ -107,14 +215,10 @@ export default function AlertsPage() {
               className="w-full accent-blue-500 cursor-pointer"
             />
           </div>
-
-          <div className="text-[11px] bg-slate-950 p-3 rounded-2xl border border-slate-800 text-slate-300">
-            <p>ℹ️ Tu configuración de umbral se almacena automáticamente en el estado global de la aplicación.</p>
-          </div>
         </div>
       </div>
 
-      <nav className="flex justify-around bg-slate-900 border border-slate-800 p-3 rounded-2xl text-xs backdrop-blur-md">
+      <nav className="flex justify-around bg-slate-900 border border-slate-800 p-3 rounded-2xl text-xs backdrop-blur-md mt-6">
         <Link href="/" className="text-slate-400 hover:text-white transition">Clima</Link>
         <Link href="/quakes" className="text-slate-400 hover:text-white transition">Sismos</Link>
         <span className="text-blue-400 font-bold">Alertas</span>
