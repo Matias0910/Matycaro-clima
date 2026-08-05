@@ -159,7 +159,7 @@ export default function Home() {
           </div>
 
           {activeTab === "weather" ? (
-            /* VISTA DE CLIMA (Todo lo que ya tenías) */
+            /* VISTA DE CLIMA */
             <>
               {/* Barra Superior */}
               <header className="flex justify-between items-center mb-4 pt-2">
@@ -279,7 +279,7 @@ export default function Home() {
               <RealArgentinaMap />
             </>
           ) : (
-            /* VISTA DE SISMOS SOLA CON SU MAPA INTERACTIVO */
+            /* VISTA DE SISMOS INTEGRADA */
             <SismosListWithModal />
           )}
 
