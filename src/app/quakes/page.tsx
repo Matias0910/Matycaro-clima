@@ -136,7 +136,7 @@ export default function QuakesPage() {
                         </span>
                       )}
                       <span className="text-[11px] text-slate-400">
-                        {q.time ? new Date(q.time).toLocaleDateString("es-ES") : "Fecha no disponible"}
+                        {q.time ? new Date(q.time).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires", dateStyle: "short", timeStyle: "short" }) : "Fecha no disponible"}
                       </span>
                     </div>
                     <p className="text-xs font-medium text-slate-200 line-clamp-1">{q.place}</p>
@@ -165,7 +165,7 @@ export default function QuakesPage() {
                 </span>
                 <h3 className="font-bold text-white text-sm mt-1">{selectedQuake.place}</h3>
                 <p className="text-xs text-slate-400">
-                  Profundidad: {selectedQuake.depth.toFixed(0)} km • {new Date(selectedQuake.time).toLocaleDateString("es-ES")}
+                  Profundidad: {selectedQuake.depth.toFixed(0)} km • {new Date(selectedQuake.time).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires", dateStyle: "short", timeStyle: "short" })}
                 </p>
               </div>
               <button 
