@@ -269,8 +269,11 @@ export default function Home() {
               {/* Pronóstico por Horas */}
               <WeatherForecast hourly={weatherData?.hourly || null} />
 
-              {/* Pronóstico Extendido a 7 Días */}
-              <ExtendedForecast daily={weatherData?.daily || null} />
+              {/* Pronóstico Extendido a 7 Días (Con Hourly incorporado) */}
+              <ExtendedForecast 
+                daily={weatherData?.daily || null} 
+                hourly={weatherData?.hourly || null} 
+              />
 
               {/* Detalles del Clima (Viento, Humedad, etc.) */}
               <WeatherDetails current={weatherData?.current || null} />
