@@ -38,7 +38,7 @@ export default function Home() {
       setLoading(true);
       setError("");
       const res = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto`
       );
       const data = await res.json();
       if (data && data.current) {
@@ -279,7 +279,10 @@ export default function Home() {
               <WeatherDetails current={weatherData?.current || null} />
 
               {/* MAPA DE ALERTAS OFICIAL (Argentina) */}
-              <RealArgentinaMap />
+              <RealArgentinaMap 
+                daily={weatherData?.daily || null} 
+                hourly={weatherData?.hourly || null} 
+              />
             </>
           ) : (
             /* VISTA DE SISMOS INTEGRADA */

@@ -34,28 +34,36 @@ const getDaysList = () => {
   return daysList;
 };
 
-// Función modificada para cruzar con los datos reales de Open-Meteo
-const getAlertPolygons = (layer: string, selectedDay: string, daily?: any) => {
-  if (!daily || !daily.time) return [];
+// Función modificada para cruzar tanto con daily como con hourly de Open-Meteo
+const getAlertPolygons = (layer: string, selectedDay: string, daily?: any, hourly?: any) => {
+  const isToday = selectedDay === getDaysList()[0].label;
 
-  // Buscamos el índice del día seleccionado en el array diario de la API
-  // Como el label es ej: "Martes 11", extraemos el número o matcheamos de forma robusta
-  const dayIndex = daily.time.findIndex((dateStr: string) => {
-    const apiDate = new Date(dateStr + "T00:00:00");
-    const apiDayNum = apiDate.getDate();
-    return selectedDay.includes(apiDayNum.toString());
-  });
+  let maxRainProb = 0;
+  let weatherCode = 0;
 
-  const targetIndex = dayIndex !== -1 ? dayIndex : 0;
-
-  const maxRainProb = daily.precipitation_probability_max?.[targetIndex] ?? 0;
-  const weatherCode = daily.weather_code?.[targetIndex] ?? 0;
+  if (isToday && hourly && hourly.time && hourly.precipitation_probability) {
+    // Tomamos las próximas 24 horas del array hourly para el día actual
+    const next24Probs = hourly.precipitation_probability.slice(0, 24);
+    maxRainProb = next24Probs.length > 0 ? Math.max(...next24Probs) : 0;
+    
+    // Si tenemos weathercode por hora, tomamos el actual (hora 0 o la actual)
+    const currentHourIndex = new Date().getHours();
+    weatherCode = hourly.weather_code?.[currentHourIndex] ?? hourly.weather_code?.[0] ?? 0;
+  } else if (daily && daily.time) {
+    const dayIndex = daily.time.findIndex((dateStr: string) => {
+      const apiDate = new Date(dateStr + "T00:00:00");
+      return selectedDay.includes(apiDate.getDate().toString());
+    });
+    const targetIndex = dayIndex !== -1 ? dayIndex : 0;
+    maxRainProb = daily.precipitation_probability_max?.[targetIndex] ?? 0;
+    weatherCode = daily.weather_code?.[targetIndex] ?? 0;
+  }
 
   // Verificaciones reales de cada fenómeno
   const hasRain = maxRainProb >= 30 || (weatherCode >= 51 && weatherCode <= 67) || (weatherCode >= 80 && weatherCode <= 82);
   const hasStorm = weatherCode >= 95;
   const hasSnow = weatherCode >= 71 && weatherCode <= 77;
-  const hasWind = false; // Open-Meteo básico diario no siempre manda ráfagas máximas, se puede ajustar si usas hourly
+  const hasWind = false; 
 
   switch (layer) {
     case "storm":
@@ -65,7 +73,7 @@ const getAlertPolygons = (layer: string, selectedDay: string, daily?: any) => {
           positions: [[-30, -65], [-30, -60], [-38, -60], [-38, -65]],
           color: "#eab308",
           level: "Alerta Amarilla de Tormentas",
-          desc: `Tormentas registradas para ${selectedDay} (Probabilidad / Código ${weatherCode}).`
+          desc: `Tormentas registradas para ${selectedDay} (Código WMO ${weatherCode}).`
         }
       ];
     case "rain":
@@ -74,8 +82,8 @@ const getAlertPolygons = (layer: string, selectedDay: string, daily?: any) => {
         {
           positions: [[-28, -60], [-28, -55], [-35, -55], [-35, -60]],
           color: "#3b82f6",
-          level: "Lluvias Intensas",
-          desc: `Precipitaciones continuas previstas para el día ${selectedDay} (${maxRainProb}% de probabilidad).`
+          level: "Lluvias / Lloviznas Intensas",
+          desc: `Precipitaciones previstas para el día ${selectedDay} (${maxRainProb}% de probabilidad).`
         }
       ];
     case "wind":
@@ -109,12 +117,17 @@ interface RealArgentinaMapProps {
     precipitation_probability_max?: number[];
     weather_code?: number[];
   } | null;
+  hourly?: {
+    time: string[];
+    precipitation_probability?: number[];
+    weather_code?: number[];
+  } | null;
 }
 
-export function RealArgentinaMap({ daily }: RealArgentinaMapProps) {
+export function RealArgentinaMap({ daily, hourly }: RealArgentinaMapProps) {
   const days = getDaysList();
   const [selectedDay, setSelectedDay] = useState(days[0].label);
-  const [activeLayer, setActiveLayer] = useState("storm");
+  const [activeLayer, setActiveLayer] = useState("rain"); // Iniciamos por defecto en rain si hay llovizna
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -125,27 +138,33 @@ export function RealArgentinaMap({ daily }: RealArgentinaMapProps) {
     }
   }, []);
 
-  // Evaluamos disponibilidad real para cada botón según el día seleccionado y los datos de la API
-  const getDayIndex = (dayLabel: string) => {
-    if (!daily || !daily.time) return 0;
+  const isToday = selectedDay === days[0].label;
+
+  let currentRainProb = 0;
+  let currentWeatherCode = 0;
+
+  if (isToday && hourly && hourly.time && hourly.precipitation_probability) {
+    const next24Probs = hourly.precipitation_probability.slice(0, 24);
+    currentRainProb = next24Probs.length > 0 ? Math.max(...next24Probs) : 0;
+    const currentHourIndex = new Date().getHours();
+    currentWeatherCode = hourly.weather_code?.[currentHourIndex] ?? hourly.weather_code?.[0] ?? 0;
+  } else if (daily && daily.time) {
     const idx = daily.time.findIndex((dateStr: string) => {
       const apiDate = new Date(dateStr + "T00:00:00");
-      return dayLabel.includes(apiDate.getDate().toString());
+      return selectedDay.includes(apiDate.getDate().toString());
     });
-    return idx !== -1 ? idx : 0;
-  };
-
-  const currentIndex = getDayIndex(selectedDay);
-  const currentRainProb = daily?.precipitation_probability_max?.[currentIndex] ?? 0;
-  const currentWeatherCode = daily?.weather_code?.[currentIndex] ?? 0;
+    const targetIdx = idx !== -1 ? idx : 0;
+    currentRainProb = daily.precipitation_probability_max?.[targetIdx] ?? 0;
+    currentWeatherCode = daily.weather_code?.[targetIdx] ?? 0;
+  }
 
   const hasStormData = currentWeatherCode >= 95;
   const hasRainData = currentRainProb >= 30 || (currentWeatherCode >= 51 && currentWeatherCode <= 67) || (currentWeatherCode >= 80 && currentWeatherCode <= 82);
   const hasWindData = false;
   const hasSnowData = currentWeatherCode >= 71 && currentWeatherCode <= 77;
 
-  // Polígonos filtrados estrictamente por la realidad de la API
-  const polygons = getAlertPolygons(activeLayer, selectedDay, daily);
+  // Polígonos filtrados cruzando daily y hourly
+  const polygons = getAlertPolygons(activeLayer, selectedDay, daily, hourly);
 
   if (!isMounted) {
     return <div className="w-full h-80 bg-slate-950 rounded-2xl flex items-center justify-center text-xs text-slate-400">Cargando mapa...</div>;
@@ -179,7 +198,7 @@ export function RealArgentinaMap({ daily }: RealArgentinaMapProps) {
         ))}
       </div>
 
-      {/* Botones de capas (Dinámicos: Se deshabilitan si no hay fenómeno real) */}
+      {/* Botones de capas (Dinámicos cruzando hourly y daily) */}
       <div className="grid grid-cols-4 gap-1.5">
         {[
           { id: "storm", icon: "⛈️", label: "Tormentas", available: hasStormData },
